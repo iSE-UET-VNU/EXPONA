@@ -1,0 +1,277 @@
+configs:
+  paper:
+    - description: "text is about Computer Science or not"
+      instructions: |
+        If the text is not about Computer Science, function returns 0.
+        If the text is about Computer Science, function returns 1.
+        If the text cannot be categorized, function returns -1.
+
+        function signature: def label_function(text)
+    - description: "text is about Physics or not"
+      instructions: |
+        If the text is not about Physics, function returns 0.
+        If the text is about Physics, function returns 1.
+        If the text cannot be categorized, function returns -1.
+
+        function signature: def label_function(text)
+    - description: "text is about Mathematics or not"
+      instructions: |
+        If the text is not about Mathematics, function returns 0.
+        If the text is about Mathematics, function returns 1.
+        If the text cannot be categorized, function returns -1.
+
+        function signature: def label_function(text)
+    - description: "text is about Statistics or not"
+      instructions: |
+        If the text is not about Statistics, function returns 0.
+        If the text is about Statistics, function returns 1.
+        If the text cannot be categorized, function returns -1.
+
+        function signature: def label_function(text)
+    - description: "text is about Quantitative Biology or not"
+      instructions: |
+        If the text is not about Quantitative Biology, function returns 0.
+        If the text is about Quantitative Biology, function returns 1.
+        If the text cannot be categorized, function returns -1.
+
+        function signature: def label_function(text)
+    - description: "text is about Quantitative Finance or not"
+      instructions: |
+        If the text is not about Quantitative Finance, function returns 0.
+        If the text is about Quantitative Finance, function returns 1.
+        If the text cannot be categorized, function returns -1.
+
+        function signature: def label_function(text)
+  pubmed:
+    - description: "text is about Anatomy [A] or not"
+      instructions: |
+        If the text is not about Anatomy, function returns 0.
+        If the text is about Anatomy, function returns 1.
+        If the text cannot be categorized, function returns -1.
+
+        function signature: def label_function(text)
+    - description: "text is about Organisms [B] or not"
+      instructions: |
+        If the text is not about Organisms, function returns 0.
+        If the text is about Organisms, function returns 1.
+        If the text cannot be categorized, function returns -1.
+
+        function signature: def label_function(text)
+    - description: "text is about Diseases [C] or not"
+      instructions: |
+        If the text is not about Diseases, function returns 0.
+        If the text is about Diseases, function returns 1.
+        If the text cannot be categorized, function returns -1.
+
+        function signature: def label_function(text)
+    - description: "text is about Chemicals and Drugs [D] or not"
+      instructions: |
+        If the text is not about Chemicals and Drugs, function returns 0.
+        If the text is about Chemicals and Drugs, function returns 1.
+        If the text cannot be categorized, function returns -1.
+
+        function signature: def label_function(text)
+    - description: "text is about Analytical, Diagnostic and Therapeutic Techniques, and Equipment [E] or not"
+      instructions: |
+        If the text is not about Analytical, Diagnostic and Therapeutic Techniques, and Equipment, function returns 0.
+        If the text is about Analytical, Diagnostic and Therapeutic Techniques, and Equipment, function returns 1.
+        If the text cannot be categorized, function returns -1.
+
+        function signature: def label_function(text)
+    - description: "text is about Psychiatry and Psychology [F] or not"
+      instructions: |
+        If the text is not about Psychiatry and Psychology, function returns 0.
+        If the text is about Psychiatry and Psychology, function returns 1.
+        If the text cannot be categorized, function returns -1.
+
+        function signature: def label_function(text)
+    - description: "text is about Phenomena and Processes [G] or not"
+      instructions: |
+        If the text is not about Phenomena and Processes, function returns 0.
+        If the text is about Phenomena and Processes, function returns 1.
+        If the text cannot be categorized, function returns -1.
+
+        function signature: def label_function(text)
+    - description: "text is about Disciplines and Occupations [H] or not"
+      instructions: |
+        If the text is not about Disciplines and Occupations, function returns 0.
+        If the text is about Disciplines and Occupations, function returns 1.
+        If the text cannot be categorized, function returns -1.
+
+        function signature: def label_function(text)
+    - description: "text is about Anthropology, Education, Sociology, and Social Phenomena [I] or not"
+      instructions: |
+        If the text is not about Anthropology, Education, Sociology, and Social Phenomena, function returns 0.
+        If the text is about Anthropology, Education, Sociology, and Social Phenomena, function returns 1.
+        If the text cannot be categorized, function returns -1.
+
+        function signature: def label_function(text)
+    - description: "text is about Technology, Industry, and Agriculture [J] or not"
+      instructions: |
+        If the text is not about Technology, Industry, and Agriculture, function returns 0.
+        If the text is about Technology, Industry, and Agriculture, function returns 1.
+        If the text cannot be categorized, function returns -1.
+
+        function signature: def label_function(text)
+    - description: "text is about Information Science [L] or not"
+      instructions: |
+        If the text is not about Information Science, function returns 0.
+        If the text is about Information Science, function returns 1.
+        If the text cannot be categorized, function returns -1.
+
+        function signature: def label_function(text)
+    - description: "text is about Named Groups [M] or not"
+      instructions: |
+        If the text is not about Named Groups, function returns 0.
+        If the text is about Named Groups, function returns 1.
+        If the text cannot be categorized, function returns -1.
+
+        function signature: def label_function(text)
+    - description: "text is about Health Care [N] or not"
+      instructions: |
+        If the text is not about Health Care, function returns 0.
+        If the text is about Health Care, function returns 1.
+        If the text cannot be categorized, function returns -1.
+
+        function signature: def label_function(text)
+    - description: "text is about Geographicals [Z] or not"
+      instructions: |
+        If the text is not about Geographicals, function returns 0.
+        If the text is about Geographicals, function returns 1.
+        If the text cannot be categorized, function returns -1.
+
+        function signature: def label_function(text)
+  movie_genre:
+    - description: "text is about Action or not"
+      instructions: |
+        If the text is not about Action, function returns 0.
+        If the text is about Action, function returns 1.
+        If the text cannot be categorized, function returns -1.
+
+        function signature: def label_function(text)
+    - description: "text is about Adventure or not"
+      instructions: |
+        If the text is not about Adventure, function returns 0.
+        If the text is about Adventure, function returns 1.
+        If the text cannot be categorized, function returns -1.
+
+        function signature: def label_function(text)
+    - description: "text is about Animation or not"
+      instructions: |
+        If the text is not about Animation, function returns 0.
+        If the text is about Animation, function returns 1.
+        If the text cannot be categorized, function returns -1.
+
+        function signature: def label_function(text)
+    - description: "text is about Comedy or not"
+      instructions: |
+        If the text is not about Comedy, function returns 0.
+        If the text is about Comedy, function returns 1.
+        If the text cannot be categorized, function returns -1.
+
+        function signature: def label_function(text)
+    - description: "text is about Crime or not"
+      instructions: |
+        If the text is not about Crime, function returns 0.
+        If the text is about Crime, function returns 1.
+        If the text cannot be categorized, function returns -1.
+
+        function signature: def label_function(text)
+    - description: "text is about Documentary or not"
+      instructions: |
+        If the text is not about Documentary, function returns 0.
+        If the text is about Documentary, function returns 1.
+        If the text cannot be categorized, function returns -1.
+
+        function signature: def label_function(text)
+    - description: "text is about Drama or not"
+      instructions: |
+        If the text is not about Drama, function returns 0.
+        If the text is about Drama, function returns 1.
+        If the text cannot be categorized, function returns -1.
+
+        function signature: def label_function(text)
+    - description: "text is about Family or not"
+      instructions: |
+        If the text is not about Family, function returns 0.
+        If the text is about Family, function returns 1.
+        If the text cannot be categorized, function returns -1.
+
+        function signature: def label_function(text)
+    - description: "text is about Fantasy or not"
+      instructions: |
+        If the text is not about Fantasy, function returns 0.
+        If the text is about Fantasy, function returns 1.
+        If the text cannot be categorized, function returns -1.
+
+        function signature: def label_function(text)
+    - description: "text is about History or not"
+      instructions: |
+        If the text is not about History, function returns 0.
+        If the text is about History, function returns 1.
+        If the text cannot be categorized, function returns -1.
+
+        function signature: def label_function(text)
+    - description: "text is about Horror or not"
+      instructions: |
+        If the text is not about Horror, function returns 0.
+        If the text is about Horror, function returns 1.
+        If the text cannot be categorized, function returns -1.
+
+        function signature: def label_function(text)
+    - description: "text is about Music or not"
+      instructions: |
+        If the text is not about Music, function returns 0.
+        If the text is about Music, function returns 1.
+        If the text cannot be categorized, function returns -1.
+
+        function signature: def label_function(text)
+    - description: "text is about Mystery or not"
+      instructions: |
+        If the text is not about Mystery, function returns 0.
+        If the text is about Mystery, function returns 1.
+        If the text cannot be categorized, function returns -1.
+
+        function signature: def label_function(text)
+    - description: "text is about Romance or not"
+      instructions: |
+        If the text is not about Romance, function returns 0.
+        If the text is about Romance, function returns 1.
+        If the text cannot be categorized, function returns -1.
+
+        function signature: def label_function(text)
+    - description: "text is about Science Fiction or not"
+      instructions: |
+        If the text is not about Science Fiction, function returns 0.
+        If the text is about Science Fiction, function returns 1.
+        If the text cannot be categorized, function returns -1.
+
+        function signature: def label_function(text)
+    - description: "text is about TV Movie or not"
+      instructions: |
+        If the text is not about TV Movie, function returns 0.
+        If the text is about TV Movie, function returns 1.
+        If the text cannot be categorized, function returns -1.
+
+        function signature: def label_function(text)
+    - description: "text is about Thriller or not"
+      instructions: |
+        If the text is not about Thriller, function returns 0.
+        If the text is about Thriller, function returns 1.
+        If the text cannot be categorized, function returns -1.
+
+        function signature: def label_function(text)
+    - description: "text is about War or not"
+      instructions: |
+        If the text is not about War, function returns 0.
+        If the text is about War, function returns 1.
+        If the text cannot be categorized, function returns -1.
+
+        function signature: def label_function(text)
+    - description: "text is about Western or not"
+      instructions: |
+        If the text is not about Western, function returns 0.
+        If the text is about Western, function returns 1.
+        If the text cannot be categorized, function returns -1.
+
+        function signature: def label_function(text)
