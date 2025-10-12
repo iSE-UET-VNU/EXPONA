@@ -9,6 +9,8 @@ from src.utils import get_labeled_subset, get_wrench_model, generate_semantic_lf
 from wrench.dataset import load_dataset
 from .label_function.base import LFType
 from .label_function.surface import SurfaceLF
+from .label_function.structural import StructuralLF
+from .label_function.semantic import SemanticLF
 from sklearn.metrics import accuracy_score, f1_score
 
 class Sella:
@@ -42,8 +44,8 @@ class Sella:
         self.EM_NAMES = self.args.end_models
         
     def calc_acceptable_threshold(self, lfs, is_intra=True):
-        if not lfs:
-            return 0.0
+        if not lfs or len(lfs) == 0:
+            return 0.0, 0.0
         max_perf = np.array([lf.estimated_performance for lf in lfs]).max()
         # max_cov = np.array([lf.estimated_coverage for lf in lfs]).max()
         if is_intra:
@@ -62,26 +64,47 @@ class Sella:
                 filtered_lf.append(h)
         return filtered_lf
 
-    def load_lf_from_file(self):
-        lf_files = list(self.args.lf_dir.glob("*.py"))
+    def load_lf_from_file(self, lf_type):
         lfs = []
-        for file in lf_files:
-            lf = SurfaceLF(saved_path=file)
-            lf.estimate_performance(self.valid_data, self.train_data, beta=self.args.beta)
-            print_label_function_stats(lf)
-            lfs.append(lf)
+        if lf_type == LFType.SURFACE:
+            lf_files = list(self.args.lf_dir.glob("*.py"))
+            for file in lf_files:
+                lf = SurfaceLF(saved_path=file, lf_dir=self.args.lf_dir)
+                lf.estimate_performance(self.valid_data, self.train_data, beta=self.args.beta)
+                print_label_function_stats(lf)
+                lfs.append(lf)
+        else:
+            lf_dir = self.args.lf_dir / lf_type.value
+            lf_files = list(lf_dir.glob("*.pkl"))
+            for file in lf_files:
+                if lf_type == LFType.STRUCTURAL:
+                    lf = StructuralLF(saved_path=file)
+                elif lf_type == LFType.SEMANTIC:
+                    lf = SemanticLF(saved_path=file)
+                else:
+                    raise ValueError(f"Unknown LF type: {lf_type}")
+                
+                lf.find_threshold(self.valid_data, self.train_data, beta=self.args.beta)
+                print_label_function_stats(lf)
+                lfs.append(lf)
         return lfs
 
     def generate_lf(self, lf_type, quantity):
         if lf_type == LFType.SURFACE:
             if self.args.run_saved_lfs and self.patience == 1:
-                lfs = self.load_lf_from_file()
+                lfs = self.load_lf_from_file(lf_type)
             else:
                 lfs = generate_surface_lfs(self.valid_data, self.train_data, quantity, self.args)
         elif lf_type == LFType.STRUCTURAL:
-            lfs = generate_structural_lfs(self.valid_data, self.train_data, quantity, self.args)
+            if self.args.run_saved_lfs and self.patience == 1:
+                lfs = self.load_lf_from_file(lf_type)
+            else:
+                lfs = generate_structural_lfs(self.valid_data, self.train_data, quantity, self.args)
         elif lf_type == LFType.SEMANTIC:
-            lfs = generate_semantic_lfs(self.valid_data, self.train_data, quantity, self.args)
+            if self.args.run_saved_lfs and self.patience == 1:
+                lfs = self.load_lf_from_file(lf_type)
+            else:
+                lfs = generate_semantic_lfs(self.valid_data, self.train_data, quantity, self.args)
         else:
             lfs = []
         return lfs
@@ -232,7 +255,7 @@ class Sella:
                     f"{label_model_name}_{end_model_name}_f1_mean": round(em_f1_mean, 5),
                     f"{label_model_name}_{end_model_name}_f1_std": round(em_f1_std, 5),
                 }
-                print(results)
+                print(f"Label Model {label_model_name} + End Model {end_model_name} - Test Acc Mean: {em_acc_mean:.4f}, Test Acc Std: {em_acc_std:.4f}, Test F1 Mean: {em_f1_mean:.4f}, Test F1 Std: {em_f1_std:.4f}")
                 self.results.update(results)
     
     def save_results_json(self, output_dir="output"):
@@ -316,6 +339,11 @@ class Sella:
         self.timing["total"] = time.time() - total_start
         self.timing = {k: round(v, 4) for k, v in self.timing.items()}
         
+        if not self.args.run_saved_lfs:
+            for lf in self.cur_structural_lf:
+                lf.save()
+            for lf in self.cur_semantic_lf:
+                lf.save()
         self.save_results_json()
         
     def run(self):

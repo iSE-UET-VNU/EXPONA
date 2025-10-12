@@ -130,9 +130,9 @@ def generate_surface_lfs(
     lf_list = []
     response_list = agent.get_completion(user_prompt, n=num_trials)
     for response in response_list:
-        code_str = extract_response(response)
+        code_str = extract_response(response.content)
         if SurfaceLF.is_runnable_lf(code_str=code_str, test_input=labeled_dataset.examples[0]["text"]):
-            lf = SurfaceLF(raw_code=code_str, eval_metric=args.eval_metric)
+            lf = SurfaceLF(raw_code=code_str, eval_metric=args.eval_metric, lf_dir=args.lf_dir)
             lf.estimate_performance(labeled_dataset=labeled_dataset, 
                                            unlabeled_dataset=unlabeled_dataset,
                                            beta=args.beta)
@@ -165,17 +165,17 @@ def generate_structural_lfs(
     
         
         generator = ScikitGenerator(train_labeled.features_2, train_labeled.labels)
-        lfs, fearture_combs = generator.generate_lfs(model='lr', num_trials=1)
-        for heu, comb in zip(lfs, fearture_combs):
-            lf = StructuralLF(lf=heu, 
-                                features_combs=comb, 
-                                eval_metric=args.eval_metric)
-            lf.find_threshold(labeled_dataset=labeled_dataset, 
-                                unlabeled_dataset=unlabeled_dataset, 
-                                beta=args.beta)
-            lf_list.append(lf)
-    
-            print_label_function_stats(lf)
+        lf = generator.generate_lfs(model='lr')
+        lf = StructuralLF(lf=lf,
+                        eval_metric=args.eval_metric,
+                        lf_path=args.lf_dir,
+                        )
+        lf.find_threshold(labeled_dataset=labeled_dataset, 
+                            unlabeled_dataset=unlabeled_dataset, 
+                            beta=args.beta)
+        lf_list.append(lf)
+
+        print_label_function_stats(lf)
     
     return lf_list
 
@@ -200,16 +200,17 @@ def generate_semantic_lfs(
         
         
         generator = ScikitGenerator(train_labeled.features, train_labeled.labels)
-        lfs, fearture_combs = generator.generate_lfs(model='mlp', num_trials=1)
-        for heu, comb in zip(lfs, fearture_combs):
-            lf = SemanticLF(lf=heu, 
-                                             features_combs=comb, 
-                                             eval_metric=args.eval_metric)
-            lf.find_threshold(labeled_dataset=labeled_dataset, 
-                                     unlabeled_dataset=unlabeled_dataset, 
-                                     beta=args.beta)
-            lf_list.append(lf)
+        lf = generator.generate_lfs(model='mlp')
+
+        lf = SemanticLF(lf=lf, 
+                        eval_metric=args.eval_metric,
+                        lf_path=args.lf_dir,
+                        )
+        lf.find_threshold(labeled_dataset=labeled_dataset, 
+                                    unlabeled_dataset=unlabeled_dataset, 
+                                    beta=args.beta)
+        lf_list.append(lf)
+
+        print_label_function_stats(lf)
     
-            print_label_function_stats(lf)
-        
     return lf_list

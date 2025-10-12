@@ -69,3 +69,66 @@ def create_system_prompt(dataset_name: str, label_number: int = None) -> str:
         "The generated function should be wise, creative, and general."
         "Always return only the function code in a code block."
     )
+
+
+def upsert_dataset_config(dataset_name: str, description: str, labels=None, multi: bool = False, *, write_back: bool = True):
+    """Add or update a dataset config.
+
+    Parameters
+    - dataset_name: key for the dataset
+    - description: short description string
+    - labels: for single-config: can be a string (full instructions) or a list of label names (will be mapped to integers starting at 0).
+              for multi-config: should be a list where each item is either a dict with 'description' and 'instructions',
+              or a string label name (will be converted to a standard binary instruction).
+    - multi: whether to store in the multi-config (list of label-specific configs) instead of single configs.
+    - write_back: if True, persist the updated YAML to disk immediately.
+
+    Returns the config object inserted/updated.
+    """
+    if multi:
+        if labels is None:
+            raise ValueError("labels must be provided for multi configs and be a list")
+        new_entries = []
+        for item in labels:
+            if isinstance(item, dict):
+                desc = item.get("description")
+                instr = item.get("instructions")
+            else:
+                desc = f"text is about {item} or not"
+                instr = (
+                    f"If the text is not about {item}, function returns 0.\n"
+                    f"If the text is about {item}, function returns 1.\n"
+                    f"If the text cannot be categorized, function returns -1.\n\n"
+                    "function signature: def label_function(text)"
+                )
+            new_entries.append({"description": desc, "instructions": instr})
+
+        configs_multi[dataset_name] = new_entries
+        _MULTI_DATA["configs"] = configs_multi
+        if write_back:
+            with _MULTI_CFG_PATH.open("w", encoding="utf-8") as f:
+                yaml.safe_dump(_MULTI_DATA, f, allow_unicode=True, sort_keys=False)
+        return new_entries
+    else:
+        if labels is None:
+            instr = "function signature: def label_function(text)"
+        elif isinstance(labels, str):
+            instr = labels
+        elif isinstance(labels, (list, tuple)):
+            lines = []
+            for i, lab in enumerate(labels):
+                lines.append(f"If the text is about {lab}, function returns {i}.")
+            lines.append("If the text cannot be categorized, function returns -1.")
+            lines.append("")
+            lines.append("function signature: def label_function(text)")
+            instr = "\n".join(lines)
+        else:
+            raise ValueError("labels must be None, a string, or a list/tuple of label names for single configs")
+
+        cfg = {"description": description, "instructions": instr}
+        configs[dataset_name] = cfg
+        _SINGLE_DATA["configs"] = configs
+        if write_back:
+            with _SINGLE_CFG_PATH.open("w", encoding="utf-8") as f:
+                yaml.safe_dump(_SINGLE_DATA, f, allow_unicode=True, sort_keys=False)
+        return cfg

@@ -1,7 +1,5 @@
 import os
 import logging
-import random
-import numpy as np
 
 from dotenv import load_dotenv
 from langchain_core.messages import SystemMessage, HumanMessage
@@ -59,33 +57,22 @@ class LLMGenerator:
             HumanMessage(content=user_prompt)
         ]
 
-        return [self.model.invoke(messages).content for _ in range(n)]
+        return [self.model.invoke(messages) for _ in range(n)]
 
-    # def count_tokens_and_cost(self, user_prompt, completions, model_name=None):
-    #     model_name = model_name or self.args.model
-    #     input_text = f"{self.system_content}\n{user_prompt}"
-    #     input_tokens = count_tokens(input_text, model_name=model_name)
-    #     output_tokens = sum(count_tokens(c, model_name=model_name) for c in completions)
+    def calculate_cost(self, input_tokens, output_tokens):
+        price_table = {
+            "gpt-4o": (2.5, 10.0),
+            "gpt-4-1106-preview": (1.0, 3.0),
+            "gpt-3.5-turbo": (0.5, 1.5),
+            "gpt-4.1": (2.5, 10.0),
+            "gemini-2.5-flash": (0.1, 0.2),
+        }
 
-    #     price_table = {
-    #         "gpt-4o": (2.5, 10.0),
-    #         "gpt-4-1106-preview": (1.0, 3.0),
-    #         "gpt-3.5-turbo": (0.5, 1.5),
-    #         "claude-3-opus": (15.0, 75.0),
-    #         "claude-3-sonnet": (3.0, 15.0),
-    #         "claude-3-haiku": (0.25, 1.25),
-    #         "gemini-pro": (0.1, 0.2),
-    #     }
+        input_price, output_price = price_table.get(self.args.model, (2.5, 10))
 
-    #     input_price, output_price = price_table.get(model_name, (0, 0))
+        cost = (input_tokens / 1e6) * input_price + (output_tokens / 1e6) * output_price
 
-    #     cost = (input_tokens / 1e6) * input_price + (output_tokens / 1e6) * output_price
-
-    #     return {
-    #         "input_tokens": input_tokens,
-    #         "output_tokens": output_tokens,
-    #         "cost_usd": cost
-    #     }
+        return cost
 
 
 class ScikitGenerator:
@@ -102,17 +89,8 @@ class ScikitGenerator:
             'mlp': MLPClassifier()
         }
 
-    def generate_feature_combinations(self, num_trials=200):
-        k = int(self.p - np.sqrt(self.p))
-            
-        feature_combinations = set()
-        while len(feature_combinations) < num_trials:
-            comb = tuple(sorted(random.sample(range(self.p), k)))
-            feature_combinations.add(comb)
-        return [list(fc) for fc in feature_combinations]
-
-    def fit_function(self, feature_idx, model):
-        X = self.val_features[:, feature_idx]
+    def fit_function(self, model):
+        X = self.val_features
         if X.ndim == 1:
             X = X.reshape(-1, 1)
 
@@ -124,13 +102,8 @@ class ScikitGenerator:
         else:
             raise ValueError(f"Model '{model}' is not supported. Choose from: {list(self.model_dict.keys())}")
 
-    def generate_lfs(self, model, num_trials):
-        feature_combinations = self.generate_feature_combinations(num_trials=num_trials)
-        lfs = []
+    def generate_lfs(self, model):
+        selected_model = model
+        lf = self.fit_function(selected_model)
 
-        for comb in feature_combinations:
-            selected_model = model
-            lf = self.fit_function(comb, selected_model)
-            lfs.append(lf)
-
-        return lfs, feature_combinations
+        return lf

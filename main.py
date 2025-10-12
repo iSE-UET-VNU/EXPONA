@@ -1,5 +1,6 @@
 from src.sella import Sella
 from src.config import Config
+from src.prompts.utils import upsert_dataset_config
 
 def ensure_dirs(args):
     (args.data_home / args.dataset / "exp_log").mkdir(parents=True, exist_ok=True)
@@ -9,6 +10,7 @@ def ensure_dirs(args):
     return args
 
 def main():
+    # upsert_dataset_config("new_dataset", "A new dataset for testing", labels=["cat", "dog", "mouse"], multi=False)
     args = Config()
     args = ensure_dirs(args)
     sella = Sella(args)
