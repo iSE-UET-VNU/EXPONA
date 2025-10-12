@@ -69,7 +69,7 @@ class Sella:
         if lf_type == LFType.SURFACE:
             lf_files = list(self.args.lf_dir.glob("*.py"))
             for file in lf_files:
-                lf = SurfaceLF(saved_path=file, lf_dir=self.args.lf_dir)
+                lf = SurfaceLF(saved_path=file, lf_path=self.args.lf_dir)
                 lf.estimate_performance(self.valid_data, self.train_data, beta=self.args.beta)
                 print_label_function_stats(lf)
                 lfs.append(lf)
@@ -78,9 +78,9 @@ class Sella:
             lf_files = list(lf_dir.glob("*.pkl"))
             for file in lf_files:
                 if lf_type == LFType.STRUCTURAL:
-                    lf = StructuralLF(saved_path=file, lf_dir=self.args.lf_dir)
+                    lf = StructuralLF(saved_path=file, lf_path=self.args.lf_dir)
                 elif lf_type == LFType.SEMANTIC:
-                    lf = SemanticLF(saved_path=file, lf_dir=self.args.lf_dir)
+                    lf = SemanticLF(saved_path=file, lf_path=self.args.lf_dir)
                 else:
                     raise ValueError(f"Unknown LF type: {lf_type}")
                 
@@ -340,6 +340,8 @@ class Sella:
         self.timing = {k: round(v, 4) for k, v in self.timing.items()}
         
         if not self.args.run_saved_lfs:
+            for lf in self.cur_surface_lf:
+                lf.save()
             for lf in self.cur_structural_lf:
                 lf.save()
             for lf in self.cur_semantic_lf:

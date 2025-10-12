@@ -9,8 +9,8 @@ logger = logging.getLogger(__name__)
 
 
 class SurfaceLF(BaseLF):
-    def __init__(self, raw_code: str = None, eval_metric: str = "f1_weighted",  saved_path: Optional[Union[str, Path]] = None, lf_dir: Path = Path("label_function")):
-        super().__init__(lf_path=lf_dir, lf_type=LFType.SURFACE)
+    def __init__(self, raw_code: str = None, eval_metric: str = "f1_weighted",  saved_path: Optional[Union[str, Path]] = None, lf_path: Path = Path("label_function")):
+        super().__init__(lf_path=lf_path, lf_type=LFType.SURFACE)
         if raw_code:
             self.lf = self._raw_code_to_funct(raw_code)
         
@@ -24,13 +24,13 @@ class SurfaceLF(BaseLF):
         saved_path = self.lf_path / f"lf_{self.find_available_index()}.py"
         try:
             with open(saved_path, "w", encoding="utf-8") as f:
-                f.write("'''")
-                f.write(f"User Prompt: {user_prompt}\n")
-                f.write(f"System Prompt: {system_prompt}\n")
-                f.write(f"Input token: {self.info.get('input_tokens')}\n")
-                f.write(f"Output token: {self.info.get('output_tokens')}\n")
-                f.write(f"Cost: {self.info.get('cost_usd')}\n")
-                f.write("'''\n\n\n")
+                # f.write("'''")
+                # f.write(f"User Prompt: {user_prompt}\n")
+                # f.write(f"System Prompt: {system_prompt}\n")
+                # f.write(f"Input token: {self.info.get('input_tokens')}\n")
+                # f.write(f"Output token: {self.info.get('output_tokens')}\n")
+                # f.write(f"Cost: {self.info.get('cost_usd')}\n")
+                # f.write("'''\n\n\n")
                 f.write(self.raw_code)
             print(f"Label function saved to {saved_path}")
         except Exception as e:

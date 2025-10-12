@@ -132,7 +132,7 @@ def generate_surface_lfs(
     for response in response_list:
         code_str = extract_response(response.content)
         if SurfaceLF.is_runnable_lf(code_str=code_str, test_input=labeled_dataset.examples[0]["text"]):
-            lf = SurfaceLF(raw_code=code_str, eval_metric=args.eval_metric, lf_dir=args.lf_dir)
+            lf = SurfaceLF(raw_code=code_str, eval_metric=args.eval_metric, lf_path=args.lf_dir)
             lf.estimate_performance(labeled_dataset=labeled_dataset, 
                                            unlabeled_dataset=unlabeled_dataset,
                                            beta=args.beta)
