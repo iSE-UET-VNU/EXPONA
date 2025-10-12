@@ -78,9 +78,9 @@ class Sella:
             lf_files = list(lf_dir.glob("*.pkl"))
             for file in lf_files:
                 if lf_type == LFType.STRUCTURAL:
-                    lf = StructuralLF(saved_path=file)
+                    lf = StructuralLF(saved_path=file, lf_dir=self.args.lf_dir)
                 elif lf_type == LFType.SEMANTIC:
-                    lf = SemanticLF(saved_path=file)
+                    lf = SemanticLF(saved_path=file, lf_dir=self.args.lf_dir)
                 else:
                     raise ValueError(f"Unknown LF type: {lf_type}")
                 
