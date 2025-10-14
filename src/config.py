@@ -6,7 +6,7 @@ import time
 class Config:
     cur_time: float = time.time()
     data_home: Path = Path("data")
-    dataset: str = "imdb"
+    dataset: str = "youtube"
     train_size: float = 0.8
     dev_size: float = 0.5
     version: str = "v9"
@@ -26,3 +26,4 @@ class Config:
     labeling_models: list[str] = field(default_factory=lambda: ["Snorkel"])
     end_models: list[str] = field(default_factory=lambda: ["MLP"])
     provider: str = "openai"
+    api_key: str = ""

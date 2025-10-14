@@ -32,21 +32,14 @@ class LLMGenerator:
             return ChatOpenAI(
                 model=model_name,
                 temperature=temperature,
-                api_key=os.getenv("OPENAI_API_KEY")
-            )
-        elif provider == "anthropic":
-            from langchain_anthropic import ChatAnthropic
-            return ChatAnthropic(
-                model=model_name,
-                temperature=temperature,
-                api_key=os.getenv("ANTHROPIC_API_KEY")
+                api_key=self.args.api_key or os.getenv("OPENAI_API_KEY"),
             )
         elif provider == "google":
             from langchain_google_genai import ChatGoogleGenerativeAI
             return ChatGoogleGenerativeAI(
                 model=model_name,
                 temperature=temperature,
-                google_api_key=os.getenv("GOOGLE_API_KEY")
+                google_api_key=self.args.api_key or os.getenv("GOOGLE_API_KEY")
             )
         else:
             raise ValueError(f"Unsupported provider: {provider}")

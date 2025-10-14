@@ -61,7 +61,7 @@ class EndClassifierModel(BaseTorchClassModel):
             patience: Optional[int] = 100,
             tolerance: Optional[float] = -1.0,
             device: Optional[torch.device] = None,
-            verbose: Optional[bool] = False,
+            verbose: Optional[bool] = True,
             **kwargs: Any):
 
         if not verbose:
