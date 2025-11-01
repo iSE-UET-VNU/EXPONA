@@ -19,26 +19,21 @@ class LLMGenerator:
         self.args = args
         self.system_prompt = system_prompt
 
-        self.model = self.get_model(
-            provider=args.provider,
-            model_name=args.model,
-            temperature=getattr(args, "temperature", 1.0)
-        )
+        self.model = self.get_model()
 
-    def get_model(self, provider, model_name, temperature) -> BaseChatModel:
-        provider = provider.lower()
+    def get_model(self) -> BaseChatModel:
+        provider = self.args.llm_model.split("/")[0]
+        model = self.args.llm_model.split("/")[-1]
         if provider == "openai":
             from langchain_openai import ChatOpenAI
             return ChatOpenAI(
-                model=model_name,
-                temperature=temperature,
+                model=model,
                 api_key=self.args.api_key or os.getenv("OPENAI_API_KEY"),
             )
         elif provider == "google":
             from langchain_google_genai import ChatGoogleGenerativeAI
             return ChatGoogleGenerativeAI(
-                model=model_name,
-                temperature=temperature,
+                model=model,
                 google_api_key=self.args.api_key or os.getenv("GOOGLE_API_KEY")
             )
         else:
@@ -55,7 +50,6 @@ class LLMGenerator:
     def calculate_cost(self, input_tokens, output_tokens):
         price_table = {
             "gpt-4o": (2.5, 10.0),
-            "gpt-4-1106-preview": (1.0, 3.0),
             "gpt-3.5-turbo": (0.5, 1.5),
             "gpt-4.1": (2.5, 10.0),
             "gemini-2.5-flash": (0.1, 0.2),

@@ -23,19 +23,31 @@ class Sella:
         self.results = {}
         self.timing = {}
         
-        self.train_data, self.valid_data, self.test_data = load_dataset(
-            data_home=self.args.data_home,
-            dataset=self.args.dataset,
-            extract_feature=True,
-            extract_fn='bert',
-            model_name='bert-base-cased',
-            cache_name='bert'
-        )
+        if not self.args.multi:
+            self.train_data, self.valid_data, self.test_data = load_dataset(
+                data_home=self.args.data_home,
+                dataset=self.args.dataset,
+                extract_feature=True,
+                extract_fn='bert',
+                model_name='bert-base-cased',
+                cache_name='bert'
+            )
+        else:
+            self.train_data, self.valid_data, self.test_data = load_dataset(
+                data_home=self.args.data_home,
+                dataset=self.args.dataset,
+                label_number=self.args.label_num,
+                extract_feature=True,
+                extract_fn='bert',
+                model_name='bert-base-cased',
+                cache_name='bert'
+            )
                 
-        self.valid_data = get_labeled_subset(
-            dataset=self.valid_data, 
-            labeled_percentage=self.args.labeled_percentage
-        )
+        if self.args.labeled_percentage < 1.0:
+            self.valid_data = get_labeled_subset(
+                dataset=self.valid_data, 
+                labeled_percentage=self.args.labeled_percentage
+            )
         
         print_label_distribution("Train", self.train_data)
         print_label_distribution("Valid", self.valid_data)
@@ -147,28 +159,7 @@ class Sella:
 
         self.train_data.weak_labels = np.array([h.get_labels(self.train_data) for h in selected_lf]).T
         self.valid_data.weak_labels = np.array([h.get_labels(self.valid_data) for h in selected_lf]).T
-        self.test_data.weak_labels = np.array([h.get_labels(self.test_data) for h in selected_lf]).T
-
-    def aggregate_weak_labels(self):
-        selected_lf = self.cur_surface_lf + self.cur_structural_lf + self.cur_semantic_lf
-
-        self.train_data.weak_labels = np.array([h.get_labels(self.train_data) for h in selected_lf]).T
-        self.valid_data.weak_labels = np.array([h.get_labels(self.valid_data) for h in selected_lf]).T
-        self.test_data.weak_labels = np.array([h.get_labels(self.test_data) for h in selected_lf]).T
-        
-        label_model = get_wrench_model(self.args.labeling_models[0])
-        label_model.fit(
-            dataset_train=self.train_data, 
-            dataset_valid=self.valid_data,
-            verbose=True,
-        )
-            
-        lm_acc = label_model.test(self.valid_data, 'acc')
-        lm_f1 = label_model.test(self.valid_data, 'f1_weighted')
-
-        print(f"Label Model {self.args.labeling_models[0]} - Valid Acc: {lm_acc:.4f}, Valid F1: {lm_f1:.4f}")
-        return label_model.predict(self.train_data)
-        
+        self.test_data.weak_labels = np.array([h.get_labels(self.test_data) for h in selected_lf]).T 
 
     def evaluate_lfs(self):
         self.results = {}
@@ -204,12 +195,12 @@ class Sella:
                 f"{label_model_name}_f1_std": round(lm_f1_std, 5),
             })
         
-            best_label_model_index = np.argmax(lm_acc_array)
+            # best_label_model_index = np.argmax(lm_acc_array)
+            best_label_model_index = 0
             best_label_model = lm_collection[best_label_model_index]
             
             train_prob_label_covered = best_label_model.predict_proba(train_data_covered)
-            train_label_covered = best_label_model.predict(train_data_covered)
-            
+            train_label_covered = best_label_model.predict(train_data_covered)                        
             lm_acc_train = accuracy_score(train_data_covered.labels, train_label_covered)
             lm_f1_train = f1_score(train_data_covered.labels, train_label_covered, average="weighted")
             
@@ -245,6 +236,8 @@ class Sella:
                     em_acc_array[T2] = em_acc
                     em_f1_array[T2] = em_f1
                     
+                    test_label = end_model.predict(self.test_data)
+                                        
                     print(f"{T2}. Label Model {label_model_name} + End Model {end_model_name} - Test Acc: {em_acc:.4f}, Test F1: {em_f1:.4f}")
         
                 em_acc_mean, em_acc_std = np.mean(em_acc_array), np.std(em_acc_array)
@@ -347,27 +340,3 @@ class Sella:
             for lf in self.cur_semantic_lf:
                 lf.save()
         self.save_results_json()
-        
-    def run(self):
-        while self.check_termination():
-            self.cur_surface_lf.extend(
-                self.generate_lf(LFType.SURFACE, self.args.min_lf_per_type - len(self.cur_surface_lf))
-            )
-            self.cur_structural_lf.extend(
-                self.generate_lf(LFType.STRUCTURAL, self.args.min_lf_per_type - len(self.cur_structural_lf))
-            )
-            self.cur_semantic_lf.extend(
-                self.generate_lf(LFType.SEMANTIC, self.args.min_lf_per_type - len(self.cur_semantic_lf))
-            )
-    
-            if self.args.alpha == 0:
-                break
-    
-            self.filter_intra(LFType.SURFACE)
-            self.filter_intra(LFType.STRUCTURAL)
-            self.filter_intra(LFType.SEMANTIC)
-
-            self.filter_inter()
-            
-        self.update_weak_labels()
-        return self.aggregate_weak_labels()

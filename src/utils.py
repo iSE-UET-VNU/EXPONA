@@ -123,8 +123,12 @@ def generate_surface_lfs(
     args: argparse.Namespace,
 ) -> List:
     
-    system_prompt = create_system_prompt(dataset_name=args.dataset)
-    user_prompt = create_user_prompt(dataset_name=args.dataset)
+    if args.multi:
+        system_prompt = create_system_prompt()
+        user_prompt = create_user_prompt(dataset_name=args.dataset, label_number=int(args.label_num))
+    else:
+        system_prompt = create_system_prompt()
+        user_prompt = create_user_prompt(dataset_name=args.dataset)
     agent = LLMGenerator(system_prompt=system_prompt, args=args)
     
     lf_list = []
@@ -165,7 +169,7 @@ def generate_structural_lfs(
     
         
         generator = ScikitGenerator(train_labeled.features_2, train_labeled.labels)
-        lf = generator.generate_lfs(model='lr')
+        lf = generator.generate_lfs(model='svm')
         lf = StructuralLF(lf=lf,
                         eval_metric=args.eval_metric,
                         lf_path=args.lf_dir,

@@ -41,50 +41,23 @@ def create_user_prompt(dataset_name: str, label_number: int = None) -> str:
         config = configs.get(dataset_name)
     if not config:
         raise ValueError(f"Dataset '{dataset_name}' is not supported in configs.")
-    return (
-    f"You are given a {config['description']} task.\n"
-    f"Write a Python labeling function that follows these instructions:\n"
-    f"{config['instructions']}\n"
-    "Please only output the full Python code in a code block. Do not write any explanation.\n"
-    "If your function uses any external libraries you must include the necessary import statements.\n"
-)
+    return f"""
+You are given a task of {config['description']}.
 
-def create_system_prompt(dataset_name: str, label_number: int = None) -> str:
-    if label_number is not None:
-        entries = configs_multi.get(dataset_name)
-        if entries is None:
-            raise ValueError(f"Dataset '{dataset_name}' is not supported in configs_multi.")
-        try:
-            config = entries[int(label_number)]
-        except (IndexError, ValueError):
-            raise ValueError(f"label_number {label_number} out of range for dataset '{dataset_name}'.")
-    else:
-        config = configs.get(dataset_name)
+Please generate a Python labeling function according to the following instructions:
+{config['instructions']}
+"""
 
-    if not config:
-        raise ValueError(f"Dataset '{dataset_name}' is not supported in configs.")
-    return (
-        f"You are a helpful assistant for a {config['description']} task.\n"
-        "Your task is to generate a Python labeling function based on the provided instructions.\n"
-        "The generated function should be wise, creative, and general."
-        "Always return only the function code in a code block."
-    )
+def create_system_prompt() -> str:
+    return """
+Your task is to generate a Python labeling function based on the provided instructions.
+The generated function should be wise, creative, and general.
+Please only output the full Python code in a code block. Do not write any explanation.
+If your function uses any external libraries you must include the necessary import statements.
+"""
 
 
-def upsert_dataset_config(dataset_name: str, description: str, labels=None, multi: bool = False, *, write_back: bool = True):
-    """Add or update a dataset config.
-
-    Parameters
-    - dataset_name: key for the dataset
-    - description: short description string
-    - labels: for single-config: can be a string (full instructions) or a list of label names (will be mapped to integers starting at 0).
-              for multi-config: should be a list where each item is either a dict with 'description' and 'instructions',
-              or a string label name (will be converted to a standard binary instruction).
-    - multi: whether to store in the multi-config (list of label-specific configs) instead of single configs.
-    - write_back: if True, persist the updated YAML to disk immediately.
-
-    Returns the config object inserted/updated.
-    """
+def upsert_dataset_config(dataset_name: str, description: str, labels=None, multi: bool = False, write_back: bool = True):
     if multi:
         if labels is None:
             raise ValueError("labels must be provided for multi configs and be a list")
@@ -110,9 +83,7 @@ def upsert_dataset_config(dataset_name: str, description: str, labels=None, mult
                 yaml.safe_dump(_MULTI_DATA, f, allow_unicode=True, sort_keys=False)
         return new_entries
     else:
-        if labels is None:
-            instr = "function signature: def label_function(text)"
-        elif isinstance(labels, str):
+        if isinstance(labels, str):
             instr = labels
         elif isinstance(labels, (list, tuple)):
             lines = []

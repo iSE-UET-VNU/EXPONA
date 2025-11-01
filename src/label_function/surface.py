@@ -13,6 +13,7 @@ class SurfaceLF(BaseLF):
         super().__init__(lf_path=lf_path, lf_type=LFType.SURFACE)
         if raw_code:
             self.lf = self._raw_code_to_funct(raw_code)
+            self.raw_code = raw_code
         
         if saved_path:
             self.lf = self.load_lf(saved_path)
