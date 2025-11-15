@@ -5,8 +5,10 @@
 
 
 ## Introduction
+EXPONA is a powerful, automated framework for programmatic labeling that generates and refines label functions (LFs) to create high-quality training datasets. By systematically exploring heuristics across surface, structural, and semantic perspectives, and selecting the most reliable ones, EXPONA reduces noise and redundancy in weak labels. This approach streamlines data annotation and improves model performance in a wide range of text classification tasks.
 
 ## The Architecture
+![EXPONA](figs/EXPONA.pdf)
 
 ## Quick Start
 ### Prerequisites
