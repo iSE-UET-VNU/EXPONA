@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "expona"
+version = "0.1.0"
+requires-python = ">=3.10"
+dependencies = [
+    "cvxpy>=1.6.6",
+    "flyingsquid>=0.0.0a0",
+    "ipykernel>=6.29.5",
+    "nltk>=3.9.1",
+    "numpy>=2.3.1",
+    "openai>=1.92.2",
+    "optuna>=4.4.0",
+    "pandas>=2.3.0",
+    "pgmpy==0.1.19",
+    "regex>=2024.11.6",
+    "loguru>=0.7.0",
+    "rich>=14.0.0",
+    "scikit-learn>=1.7.0",
+    "sentence-transformers>=4.1.0",
+    "seqeval>=1.2.2",
+    "snorkel>=0.10.0",
+    "tiktoken>=0.9.0",
+    "tqdm>=4.67.1",
+    "numba",
+    "torch",
+    "torchvision",
+    "langchain-core",
+    "langchain-google-genai",
+    "langchain-openai",
+    "dotenv",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]

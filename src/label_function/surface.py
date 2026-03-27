@@ -1,0 +1,143 @@
+import json
+import logging
+import numpy as np
+from pathlib import Path
+from typing import Callable, Optional, Union
+from .base import BaseLF, LFType
+from wrench.dataset.basedataset import BaseDataset
+
+logger = logging.getLogger(__name__)
+
+
+class SurfaceLF(BaseLF):
+    def __init__(self, raw_code: str = None, eval_metric: str = "f1_weighted",  saved_path: Optional[Union[str, Path]] = None, lf_path: Path = Path("label_function")):
+        super().__init__(lf_path=lf_path, lf_type=LFType.SURFACE)
+        if raw_code:
+            self.lf = self._raw_code_to_funct(raw_code)
+            self.raw_code = raw_code
+        
+        if saved_path:
+            self.load_lf(saved_path)
+            self.saved_path = saved_path
+            self.is_saved = True
+            
+        self.get_eval_metric(eval_metric)
+
+    def save(self, user_prompt=None, system_prompt=None) -> Path:
+        idx = self.find_available_index()
+        saved_path = self.lf_path / f"lf_{idx}.py"
+        meta_path = self.lf_path / f"lf_{idx}.meta.json"
+
+        try:
+            # ---- save code ----
+            with open(saved_path, "w", encoding="utf-8") as f:
+                f.write("'''")
+                f.write(f"User Prompt: {user_prompt}\n")
+                f.write(f"System Prompt: {system_prompt}\n")
+                f.write("'''\n\n\n")
+                f.write(self.raw_code)
+
+            # ---- save metadata ----
+            meta = {
+                "estimated_fbeta": self.estimated_fbeta,
+                "estimated_performance": self.estimated_performance,
+                "estimated_coverage": self.estimated_coverage,
+            }
+
+            with open(meta_path, "w", encoding="utf-8") as f:
+                json.dump(meta, f, indent=2)
+
+            print(f"Label function saved to {saved_path}")
+
+        except Exception as e:
+            logging.error(f"Error writing LF: {e}")
+
+        self.saved_path = saved_path
+        return saved_path
+    
+    def load_lf(self, path: Union[str, Path]):
+        path = Path(path)
+
+        # ---- load code ----
+        with open(path, 'r', encoding='utf-8') as file:
+            code_str = file.read()
+            self.lf = self._raw_code_to_funct(code_str)
+
+        # ---- load metadata (nếu có) ----
+        meta_path = path.with_suffix(".meta.json")
+        if meta_path.exists():
+            with open(meta_path, "r", encoding="utf-8") as f:
+                meta = json.load(f)
+
+            self.estimated_fbeta = meta.get("estimated_fbeta")
+            self.estimated_performance = meta.get("estimated_performance")
+            self.estimated_coverage = meta.get("estimated_coverage")
+    
+    def get_labels(self, dataset: BaseDataset):
+        labels = []
+        for data_point in dataset.examples:
+            labels.append(self.lf(data_point['text']))
+            
+        return labels
+    
+    def estimate_performance(self, labeled_dataset: BaseDataset, unlabeled_dataset: BaseDataset, beta=0.1, using_unlabeled=True):
+        eps = 1e-8
+        
+        pred_labels_lab = np.asarray(self.get_labels(labeled_dataset))
+        true_labels_lab = np.asarray(labeled_dataset.labels)
+    
+        mask_lab = (pred_labels_lab != -1)
+        if mask_lab.sum() > 0:
+            performance = float(self.score_funct(pred_labels_lab[mask_lab], true_labels_lab[mask_lab]))
+        else:
+            performance = 0.0
+    
+        if using_unlabeled:
+            pred_labels_unlab = np.asarray(self.get_labels(unlabeled_dataset))
+            coverage = float((pred_labels_unlab != -1).mean())
+        else:
+            coverage = float((pred_labels_lab != -1).mean())
+
+        f_beta = float((1 + beta**2) * (performance * coverage) / (beta**2 * performance + coverage + eps))
+    
+        self.estimated_performance = performance
+        self.estimated_coverage = coverage
+        self.estimated_fbeta = f_beta
+
+    def _raw_code_to_funct(self, code_str: str) -> Optional[Callable]:
+        exec_env = {}
+        try:
+            exec(code_str, exec_env, exec_env)
+            lf_func = exec_env.get("label_function")
+            if not callable(lf_func):
+                logging.error("Function 'label_function' not found or not callable.")
+                return None
+            return lf_func
+        except Exception as e:
+            logging.error(f"Error extracting function: {e}")
+            return None
+
+    @staticmethod
+    def is_runnable_lf(code_str: str, test_input=None) -> bool:
+        try:
+            compile(code_str, '<string>', 'exec')
+        except Exception as e:
+            logging.error(f"LF Syntax Error: {e}")
+            return False
+
+        try:
+            exec_env = {}
+            exec(code_str, exec_env, exec_env)
+
+            lf_func = exec_env.get("label_function")
+            if not callable(lf_func):
+                logging.error("No callable function named 'label_function' found.")
+                return False
+            if test_input is not None:
+                lf_func(test_input)
+                
+        except Exception as e:
+            logging.error(f"LF Runtime Error: {e}")
+            return False
+
+        return True
