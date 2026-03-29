@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/iSE-UET-VNU/EXPONA.git)
 [![Python 3.12](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/release/python-31312/)
-[![Elsevier](https://img.shields.io/badge/📝-Paper-red)](https://www.sciencedirect.com)
+[![Elsevier](https://img.shields.io/badge/📝-Paper-red)](https://doi.org/10.1016/j.knosys.2026.115843)
 </div>
 
 ![EXPONA](figs/EXPONA.png)
@@ -35,7 +35,7 @@ If you want to use **your own dataset**, register it in `./wrench/dataset/__init
 }
 ```
 
-Running our experiments:
+To run our experiments:
 ```bash
 python main.py \
   --dataset imdb \
@@ -51,18 +51,15 @@ python main.py \
 If you're using `Expona` in your research or applications, please consider citing our paper:
 
 ```
-@article{expona,
+@article{lam2026structured,
 title = {Structured Exploration and Exploitation of Label Functions for Automated Data Annotation},
-journal = {Knowledge-based Systems},
-volume = {xx},
-pages = {xx},
-year = {2026},
-issn = {xx},
-doi = {xx},
-url = {xx},
 author = {Phong Lam, Ha-Linh Nguyen, Thu-Trang Nguyen, Son Nguyen, Hieu Dinh Vo},
+doi = {https://doi.org/10.1016/j.knosys.2026.115843},
+journal = {Knowledge-based systems},
+publisher={Elsevier},
+year = {2026},
 }
 ```
 
 If you have any questions, comments, or suggestions, please do not hesitate to contact us.
-- Email: 22028164@vnu.edu.vn
+- Email: 22028164@vnu.edu.vn or duyphong.uet@gmail.com
